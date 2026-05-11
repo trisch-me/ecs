@@ -49,8 +49,10 @@ def generate(nested, docs_only_nested, ecs_generated_version, semconv_version, o
     save_markdown(path.join(out_dir, 'ecs-field-reference.md'),
                   page_field_reference(ecs_generated_version, "Elasticsearch", fieldsets))
     for fieldset in fieldsets:
-        save_markdown(path.join(out_dir, f'ecs-{fieldset["name"]}.md'),
-                      page_fieldset(fieldset, nested, ecs_generated_version))
+        out_file = path.join(out_dir, f'ecs-{fieldset["name"]}.md')
+        has_legacy_page = path.exists(out_file)
+        save_markdown(out_file,
+                      page_fieldset(fieldset, nested, ecs_generated_version, has_legacy_page))
 
 # Helpers
 
@@ -155,7 +157,7 @@ def page_index(ecs_generated_version):
 
 
 @templated('fieldset.j2')
-def page_fieldset(fieldset, nested, ecs_generated_version):
+def page_fieldset(fieldset, nested, ecs_generated_version, has_legacy_page=True):
     """Render ecs-{fieldset.name}.md with fields, reuse, and nesting sections."""
     sorted_reuse_fields = render_fieldset_reuse_text(fieldset)
     render_nestings_reuse_fields = render_nestings_reuse_section(fieldset)
@@ -165,7 +167,8 @@ def page_fieldset(fieldset, nested, ecs_generated_version):
                 sorted_reuse_fields=sorted_reuse_fields,
                 render_nestings_reuse_section=render_nestings_reuse_fields,
                 sorted_fields=sorted_fields,
-                usage_doc=usage_doc)
+                usage_doc=usage_doc,
+                has_legacy_page=has_legacy_page)
 
 # Field Reference Page
 
